@@ -38,7 +38,7 @@ Nella cartella del progetto:
 python3 app.py
 
 La dashboard sarà disponibile su:
-http://100.64.55.102:8080/
+
 
 
 ## 🔧 Configurazione servizi
