@@ -1,0 +1,89 @@
+<html>
+<head>
+    <style>
+        body {
+            background-color: #121212;
+            color: #e0e0e0;
+            font-family: Arial, sans-serif;
+        }
+
+        .status-badge {
+            padding: 4px 8px;
+            border-radius: 6px;
+            color: white;
+            font-weight: bold;
+            display: inline-block;
+            min-width: 70px;
+            text-align: center;
+        }
+        .status-active { background-color: #28a745; }
+        .status-inactive { background-color: #dc3545; }
+        .status-error { background-color: #6c757d; }
+    </style>
+
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}?v=10">
+    <script src="{{ url_for('static', filename='script.js') }}?v=10"></script>
+</head>
+
+<body>
+    <h1>Status Raspberry</h1>
+
+    <div id="content">
+
+        <!-- SISTEMA -->
+        <div class="section">
+            <h2>Sistema</h2>
+
+            <p><strong>CPU totale:</strong> <span id="cpu-total" class="status-badge"></span></p>
+
+            <div class="cpu-details">
+                <p><strong>User:</strong> <span id="cpu-user"></span></p>
+                <p><strong>System:</strong> <span id="cpu-system"></span></p>
+                <p><strong>Idle:</strong> <span id="cpu-idle"></span></p>
+                <p><strong>I/O Wait:</strong> <span id="cpu-wait"></span></p>
+            </div>
+
+            <p><strong>Temperatura:</strong> <span id="temp"></span></p>
+        </div>
+
+        <!-- SD CARD -->
+        <div class="section">
+            <h2>SD Card</h2>
+            <p><strong>Disco totale:</strong> <span id="disk-total"></span></p>
+            <p><strong>Usato:</strong> <span id="disk-used"></span></p>
+            <p><strong>Libero:</strong> <span id="disk-free"></span></p>
+            <p><strong>Utilizzo:</strong> <span id="disk-percent"></span></p>
+        </div>
+
+        <!-- USB -->
+        <div class="section">
+            <h2>Chiavetta USB</h2>
+            <p><strong>Totale:</strong> <span id="usb-total"></span></p>
+            <p><strong>Usato:</strong> <span id="usb-used"></span></p>
+            <p><strong>Libero:</strong> <span id="usb-free"></span></p>
+            <p><strong>Utilizzo:</strong> <span id="usb-percent"></span></p>
+        </div>
+
+        <!-- UPTIME -->
+        <div class="section">
+            <h2>Tempo di utilizzo</h2>
+            <p><strong>Uptime:</strong> <span id="uptime"></span></p>
+        </div>
+
+        <!-- SERVIZI -->
+        <div class="section">
+            <h2>Servizi installati</h2>
+            <p><strong>Navidrome:</strong> <span id="navidrome" class="status-badge"></span></p>
+            <p><strong>Syncthing:</strong> <span id="syncthing" class="status-badge"></span></p>
+            <p><strong>Tailscale:</strong> <span id="tailscale" class="status-badge"></span></p>
+            <p><strong>SSH:</strong> <span id="ssh" class="status-badge"></span></p>
+            <p><strong>Cron:</strong> <span id="cron" class="status-badge"></span></p>
+            <p><strong>Network:</strong> <span id="network" class="status-badge"></span></p>
+            <p><strong>WiFi:</strong> <span id="wifi" class="status-badge"></span></p>
+            <p><strong>Dashboard:</strong> <span id="dashboard" class="status-badge"></span></p>
+        </div>
+
+    </div>
+
+</body>
+</html>

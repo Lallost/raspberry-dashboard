@@ -1,0 +1,106 @@
+<html>
+<head>
+<style>
+     body {
+        background-color: #121212;
+        color: #e0e0e0;
+        font-family: Arial, sans-serif;
+     }
+
+    .status-badge {
+        padding: 4px 8px;
+        border-radius: 6px;
+        color: white;
+        font-weight: bold;
+        display: inline-block;
+        min-width: 70px;
+        text-align: center;
+    }
+    .status-active { background-color: #28a745; }   /* verde */
+    .status-inactive { background-color: #dc3545; } /* rosso */
+    .status-error { background-color: #6c757d; }    /* grigio */
+</style>
+</head>
+
+<body>
+    <h1>Status Raspberry</h1>
+
+    <div id="content">
+        <p><strong>CPU:</strong> <span id="cpu" class="status-badge"></span></p>
+        <p><strong>Temperatura:</strong> <span id="temp"></span></p>
+        <p><strong>Disco:</strong> <span id="disk"></span></p>
+        <p><strong>Uptime:</strong> <span id="uptime"></span></p>
+        <p><strong>Navidrome:</strong> <span id="navidrome" class="status-badge"></span></p>
+        <p><strong>Syncthing:</strong> <span id="syncthing" class="status-badge"></span></p>
+    </div>
+
+    <script>
+
+        /* -------------------------
+           FUNZIONE: COLORA GLI STATI
+        -------------------------- */
+        function setStatus(id, value) {
+            const el = document.getElementById(id);
+            el.textContent = value;
+
+            el.classList.remove("status-active", "status-inactive", "status-error");
+
+            if (value === "active") {
+                el.classList.add("status-active");
+            } else if (value === "inactive") {
+                el.classList.add("status-inactive");
+            } else {
+                el.classList.add("status-error");
+            }
+        }
+
+        /* -------------------------
+           FUNZIONE: COLORA LA CPU
+        -------------------------- */
+        function setCpu(value) {
+            const el = document.getElementById("cpu");
+            el.textContent = value;
+
+            const match = value.match(/([0-9.]+)\s+us,\s+([0-9.]+)\s+sy/);
+            if (!match) {
+                el.classList.add("status-error");
+                return;
+            }
+
+            const user = parseFloat(match[1]);
+            const system = parseFloat(match[2]);
+            const usage = user + system;
+
+            el.classList.remove("status-active", "status-inactive", "status-error");
+
+            if (usage < 40) {
+                el.classList.add("status-active");
+            } else if (usage < 75) {
+                el.classList.add("status-inactive");
+            } else {
+                el.classList.add("status-error");
+            }
+        }
+
+        /* -------------------------
+           FUNZIONE PRINCIPALE UPDATE
+        -------------------------- */
+        async function update() {
+            const res = await fetch("/api/status");
+            const data = await res.json();
+
+            setCpu(data.cpu);
+            setStatus("navidrome", data.navidrome);
+            setStatus("syncthing", data.syncthing);
+ m
+            document.getElementById("temp").textContent = data.temp;
+            document.getElementById("disk").textContent = data.disk;
+            document.getElementById("uptime").textContent = data.uptime;
+        }
+
+        update();
+        setInterval(update, 3000);
+
+    </script>
+</body>
+</html>
