@@ -123,10 +123,14 @@ setInterval(() => {
             if (!isNaN(temp)) {
                 tempSeries.append(Date.now(), temp);
             }
+
+            // 🔥 AGGIUNGI QUESTE 2 RIGHE QUI
+            document.getElementById("maxTemp").textContent = data.max;
+            document.getElementById("minTemp").textContent = data.min;
         })
         .catch(() => {
-            // In caso di errore rete, non bloccare il grafico
             tempSeries.append(Date.now(), null);
         });
 }, 1000);
+
 
