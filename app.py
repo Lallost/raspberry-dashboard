@@ -1,6 +1,10 @@
 from flask import Flask, render_template, jsonify
 import subprocess
 
+import json
+with open("metadata.json") as f:
+    METADATA = json.load(f)
+
 app = Flask(__name__)
 
 def run(cmd):
@@ -8,7 +12,7 @@ def run(cmd):
 
 @app.route("/")
 def index():
-    return render_template("index.html")
+    return render_template("index.html", metadata=METADATA)
 
 def safe_run(cmd):
     try:
@@ -22,7 +26,7 @@ def status():
         "cpu": safe_run("top -bn1 | grep 'Cpu(s)'"),
         "temp": safe_run("vcgencmd measure_temp"),
         "disk": safe_run("df -h / | grep '/'"),
-	"usb": safe_run("df -h /mnt/music | grep '/'"),
+	    "usb": safe_run("df -h /mnt/music | grep '/'"),
         "uptime": safe_run("uptime -p"),
 
         # SERVIZI IMPORTANTI
