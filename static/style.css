@@ -39,3 +39,17 @@ h1 {
         grid-template-columns: 1fr;
     }
 }
+
+.chart-container {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.chart-stats {
+    display: flex;
+    flex-direction: column;
+    font-size: 0.9rem;
+    color: #ccc;
+}
+

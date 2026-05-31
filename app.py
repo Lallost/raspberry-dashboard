@@ -2,6 +2,7 @@ from flask import Flask, render_template, jsonify
 import subprocess
 import json
 import os
+import psutil
 
 with open("metadata.json") as f:
     METADATA = json.load(f)
@@ -38,6 +39,10 @@ def safe_run(cmd):
         return subprocess.check_output(cmd, shell=True).decode().strip()
     except:
         return "error"
+
+def get_cpu_percent():
+    # Ritorna la percentuale di utilizzo CPU senza bloccare il server
+    return psutil.cpu_percent(interval=None)
 
 @app.route("/api/status")
 def status():
@@ -94,6 +99,16 @@ def api_temperature():
         "max": stats["max"],
         "min": stats["min"]
     })
+
+@app.route("/api/cpu_percent")
+def api_cpu_percent():
+    try:
+        cpu = get_cpu_percent()
+        return jsonify({"cpu": cpu})
+    except Exception as e:
+        print("CPU ERROR:", e)
+        return jsonify({"cpu": None}), 500
+
 
 if __name__ == "__main__":
     app.run(host="0.0.0.0", port=8080)

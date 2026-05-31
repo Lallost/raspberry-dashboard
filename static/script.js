@@ -133,4 +133,53 @@ setInterval(() => {
         });
 }, 1000);
 
+// === CPU LIVE CHART ===
+
+// Serie dati CPU
+const cpuSeries = new TimeSeries();
+
+// Configura il grafico CPU (identico alla temperatura)
+const cpuChart = new SmoothieChart({
+    millisPerPixel: 100,   // ~2 minuti di finestra
+    grid: {
+        strokeStyle: 'rgba(255,255,255,0.1)',
+        lineWidth: 1,
+        millisPerLine: 5000,
+        verticalSections: 4
+    },
+    labels: { fillStyle: '#ffffff' }
+});
+
+// Collega la serie al canvas
+cpuChart.addTimeSeries(cpuSeries, {
+    strokeStyle: 'rgba(80, 160, 255, 1)',
+    lineWidth: 2
+});
+
+// Avvia il grafico
+cpuChart.streamTo(document.getElementById("cpuChart"), 1000);
+
+// Min/Max CPU
+let cpuMin = null;
+let cpuMax = null;
+
+// Aggiorna ogni secondo
+setInterval(() => {
+    fetch("/api/cpu_percent")
+        .then(r => r.json())
+        .then(data => {
+            const cpu = data.cpu; // percentuale 0-100
+
+            cpuSeries.append(Date.now(), cpu);
+
+            // Aggiorna min/max
+            if (cpuMin === null || cpu < cpuMin) cpuMin = cpu;
+            if (cpuMax === null || cpu > cpuMax) cpuMax = cpu;
+
+            document.getElementById("cpuMin").textContent = cpuMin.toFixed(1);
+            document.getElementById("cpuMax").textContent = cpuMax.toFixed(1);
+        });
+}, 1000);
+
+
 
