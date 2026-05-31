@@ -22,8 +22,7 @@
     </style>
 
     <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}?v=10">
-    <script src="{{ url_for('static', filename='script.js') }}?v=10"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/smoothie/1.36.0/smoothie.min.js"></script>
+    
 </head>
 
 <body>
@@ -90,9 +89,13 @@
 
     </div>
 
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/smoothie/1.36.0/smoothie.min.js"></script>
+    <script src="{{ url_for('static', filename='script.js') }}?v=11"></script>
+
+    <footer style="position: fixed; bottom: 10px; right: 10px; opacity: 0.6; font-size: 0.8rem;">
+        v{{ metadata.version }} – {{ metadata.release_date }}
+    </footer>
 </body>
 </html>
-<footer style="position: fixed; bottom: 10px; right: 10px; opacity: 0.6; font-size: 0.8rem;">
-    v{{ metadata.version }} – {{ metadata.release_date }}
-</footer>
+
 
