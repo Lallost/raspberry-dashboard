@@ -65,20 +65,78 @@ async function update() {
 
     document.getElementById("temp").textContent = data.temp;
 
+    // SD
     const disk = parseDisk(data.disk);
     document.getElementById("disk-total").textContent = disk.total;
     document.getElementById("disk-used").textContent = disk.used;
     document.getElementById("disk-free").textContent = disk.free;
     document.getElementById("disk-percent").textContent = disk.percent;
 
+    const sdUsed = parseFloat(disk.percent);
+    const sdFree = 100 - sdUsed;
+    updateSdPie(sdUsed, sdFree);
+
+    // USB
     const usb = parseDisk(data.usb);
     document.getElementById("usb-total").textContent = usb.total;
     document.getElementById("usb-used").textContent = usb.used;
     document.getElementById("usb-free").textContent = usb.free;
     document.getElementById("usb-percent").textContent = usb.percent;
 
+    const usbUsed = parseFloat(usb.percent);
+    const usbFree = 100 - usbUsed;
+    updateUsbPie(usbUsed, usbFree);
+
+
     document.getElementById("uptime").textContent = data.uptime;
 }
+
+let sdPieChart = null;
+let usbPieChart = null;
+
+function updateSdPie(used, free) {
+    if (sdPieChart) sdPieChart.destroy();
+
+    sdPieChart = new Chart(document.getElementById('sdPie'), {
+        type: 'pie',
+        data: {
+            labels: ['Used', 'Free'],
+            datasets: [{
+                data: [used, free],
+                backgroundColor: ['#ff4d4d', '#4dff4d']
+            }]
+        },
+        options: {
+            layout: { padding: 0 },
+            plugins: {
+                legend: { labels: { color: 'white' } }
+            }
+        }
+    });
+}
+
+
+function updateUsbPie(used, free) {
+    if (usbPieChart) usbPieChart.destroy();
+
+    usbPieChart = new Chart(document.getElementById('usbPie'), {
+        type: 'pie',
+        data: {
+            labels: ['Used', 'Free'],
+            datasets: [{
+                data: [used, free],
+                backgroundColor: ['#ff4d4d', '#4dff4d']
+            }]
+        },
+        options: {
+            layout: { padding: 0 },
+            plugins: {
+                legend: { labels: { color: 'white' } }
+            }
+        }
+    });
+}
+
 
 update();
 setInterval(update, 3000);
@@ -180,6 +238,7 @@ setInterval(() => {
             document.getElementById("cpuMax").textContent = cpuMax.toFixed(1);
         });
 }, 1000);
+
 
 
 

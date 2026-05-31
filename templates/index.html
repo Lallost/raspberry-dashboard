@@ -23,6 +23,8 @@
 
     <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}?v=10">
     
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
 </head>
 
 <body>
@@ -44,6 +46,8 @@
             </div>
 
             <p><strong>Temperature:</strong> <span id="temp"></span></p>
+            <p><strong>Uptime:</strong> <span id="uptime"></span></p>
+
         </div>
         
         <!-- CONTENITORE ESTERNO: deve essere block -->
@@ -74,25 +78,33 @@
         <!-- SD CARD -->
         <div class="section">
             <h2>SD Card</h2>
-            <p><strong>Disk total:</strong> <span id="disk-total"></span></p>
-            <p><strong>Disk used:</strong> <span id="disk-used"></span></p>
-            <p><strong>Disk free:</strong> <span id="disk-free"></span></p>
-            <p><strong>Disk percent:</strong> <span id="disk-percent"></span></p>
+
+            <div class="disk-row">
+                <div class="disk-info">
+                    <p><strong>Total:</strong> <span id="disk-total"></span></p>
+                    <p><strong>Used:</strong> <span id="disk-used"></span></p>
+                    <p><strong>Free:</strong> <span id="disk-free"></span></p>
+                    <p><strong>Percent:</strong> <span id="disk-percent"></span></p>
+                </div>
+
+                <canvas id="sdPie" width="140" height="140"></canvas>
+            </div>
         </div>
 
-        <!-- USB -->
+        <!-- USB KEY -->
         <div class="section">
-            <h2>USB Key</h2>
-            <p><strong>USB total:</strong> <span id="usb-total"></span></p>
-            <p><strong>USB used:</strong> <span id="usb-used"></span></p>
-            <p><strong>USB free:</strong> <span id="usb-free"></span></p>
-            <p><strong>USB percent:</strong> <span id="usb-percent"></span></p>
-        </div>
+            <h2>USB Drive</h2>
 
-        <!-- UPTIME -->
-        <div class="section">
-            <h2>Uptime</h2>
-            <p><strong>Uptime:</strong> <span id="uptime"></span></p>
+            <div class="disk-row">
+                <div class="disk-info">
+                    <p><strong>Total:</strong> <span id="usb-total"></span></p>
+                    <p><strong>Used:</strong> <span id="usb-used"></span></p>
+                    <p><strong>Free:</strong> <span id="usb-free"></span></p>
+                    <p><strong>Percent:</strong> <span id="usb-percent"></span></p>
+                </div>
+
+                <canvas id="usbPie" width="140" height="140"></canvas>
+            </div>
         </div>
 
         <!-- SERVIZI -->
