@@ -82,3 +82,51 @@ async function update() {
 
 update();
 setInterval(update, 3000);
+
+// === TEMPERATURE LIVE CHART ===
+
+// Serie dati
+const tempSeries = new TimeSeries();
+
+// Configurazione grafico
+const tempChart = new SmoothieChart({
+    millisPerPixel: 100,        // ~120 secondi visibili
+    interpolation: 'linear',
+    grid: {
+        strokeStyle: 'rgba(255,255,255,0.08)',
+        lineWidth: 1,
+        millisPerLine: 5000,
+        verticalSections: 4
+    },
+    labels: {
+        fillStyle: '#ffffff',
+        fontSize: 12,
+        precision: 1
+    }
+});
+
+// Collega la serie al grafico
+tempChart.addTimeSeries(tempSeries, {
+    strokeStyle: 'rgba(255, 80, 80, 1)',
+    lineWidth: 2
+});
+
+// Avvia il grafico
+tempChart.streamTo(document.getElementById("tempChart"), 1000);
+
+// Aggiorna la temperatura ogni secondo
+setInterval(() => {
+    fetch("/api/temperature")
+        .then(r => r.json())
+        .then(data => {
+            const temp = parseFloat(data.temperature);
+            if (!isNaN(temp)) {
+                tempSeries.append(Date.now(), temp);
+            }
+        })
+        .catch(() => {
+            // In caso di errore rete, non bloccare il grafico
+            tempSeries.append(Date.now(), null);
+        });
+}, 1000);
+

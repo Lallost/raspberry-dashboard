@@ -42,5 +42,16 @@ def status():
 
     return jsonify(data)
 
+@app.route("/api/temperature")
+def api_temperature():
+    raw = safe_run("vcgencmd measure_temp")
+    # raw è tipo: "temp=52.3'C"
+    try:
+        value = raw.replace("temp=", "").replace("'C", "")
+        return {"temperature": float(value)}
+    except:
+        return {"temperature": None}
+
+
 if __name__ == "__main__":
     app.run(host="0.0.0.0", port=8080)

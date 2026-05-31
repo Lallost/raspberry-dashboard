@@ -23,6 +23,7 @@
 
     <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}?v=10">
     <script src="{{ url_for('static', filename='script.js') }}?v=10"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/smoothie/1.36.0/smoothie.min.js"></script>
 </head>
 
 <body>
@@ -44,6 +45,10 @@
             </div>
 
             <p><strong>Temperature:</strong> <span id="temp"></span></p>
+        </div>
+        
+        <div class="chart-container">
+            <canvas id="tempChart" width="300" height="80"></canvas>
         </div>
 
         <!-- SD CARD -->
