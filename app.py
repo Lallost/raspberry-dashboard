@@ -1,4 +1,4 @@
-from flask import Flask, render_template, jsonify
+from flask import Flask, render_template, jsonify, request
 import subprocess
 import json
 import os
@@ -119,6 +119,43 @@ def api_cpu_percent():
         print("CPU ERROR:", e)
         return jsonify({"cpu": None}), 500
 
+@app.route("/api/service/<action>")
+def api_service_action(action):
+    name = request.args.get("name")
+
+    if not name:
+        print("ERROR: Missing service name")
+        return jsonify({"error": "Missing service name"}), 400
+
+    if action not in ["start", "stop", "restart"]:
+        print("ERROR: Invalid action:", action)
+        return jsonify({"error": "Invalid action"}), 400
+
+    try:
+        output = subprocess.check_output(
+            ["sudo", "systemctl", action, name],
+            stderr=subprocess.STDOUT
+        ).decode().strip()
+
+        return jsonify({
+            "service": name,
+            "action": action,
+            "status": "ok",
+            "output": output
+        })
+
+    except subprocess.CalledProcessError as e:
+        print("SYSTEMCTL ERROR:", e.output.decode())
+        return jsonify({
+            "service": name,
+            "action": action,
+            "status": "failed",
+            "output": e.output.decode()
+        }), 500
+
+    except Exception as e:
+        print("UNEXPECTED ERROR:", str(e))
+        return jsonify({"error": "Unexpected error"}), 500
 
 if __name__ == "__main__":
     app.run(host="0.0.0.0", port=8080)

@@ -142,6 +142,17 @@ function updateUsbPie(used, free) {
 }
 
 
+function serviceAction(name, action) {
+    fetch(`/api/service/${action}?name=${name}`)
+        .then(r => r.json())
+        .then(data => {
+            console.log(data);
+            alert(`${name} → ${action} eseguito`);
+        })
+        .catch(err => alert("Errore: " + err));
+}
+
+
 update();
 setInterval(update, 3000);
 
