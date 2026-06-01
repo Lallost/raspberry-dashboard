@@ -81,3 +81,49 @@ h1 {
     margin: 0;
     padding: 0;
 }
+
+.services-table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-top: 10px;
+}
+
+.services-table th,
+.services-table td {
+    padding: 8px 12px;
+    text-align: left;
+}
+
+.services-table th {
+    background: #222;
+    color: #fff;
+}
+
+.services-table tr:nth-child(even) {
+    background: #222;
+}
+
+.services-table button {
+    margin-right: 4px;
+    padding: 3px 6px;
+    font-size: 11px;
+    cursor: pointer;
+    white-space: nowrap;
+}
+
+.services-table td.actions {
+    display: flex;
+    gap: 4px;
+    flex-wrap: nowrap;
+}
+
+@media (max-width: 480px) {
+    .services-table button {
+        padding: 2px 4px;
+        font-size: 10px;
+        min-width: 45px;
+    }
+}
+
+
+

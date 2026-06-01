@@ -110,15 +110,133 @@
         <!-- SERVIZI -->
         <div class="section">
             <h2>Installed services</h2>
-            <p><strong>Navidrome:</strong> <span id="navidrome" class="status-badge"></span></p>
-            <p><strong>Syncthing:</strong> <span id="syncthing" class="status-badge"></span></p>
-            <p><strong>Tailscale:</strong> <span id="tailscale" class="status-badge"></span></p>
-            <p><strong>SSH:</strong> <span id="ssh" class="status-badge"></span></p>
-            <p><strong>Cron:</strong> <span id="cron" class="status-badge"></span></p>
-            <p><strong>Network:</strong> <span id="network" class="status-badge"></span></p>
-            <p><strong>WiFi:</strong> <span id="wifi" class="status-badge"></span></p>
-            <p><strong>Dashboard:</strong> <span id="dashboard" class="status-badge"></span></p>
+
+            <table class="services-table">
+                <thead>
+                    <tr>
+                        <th>Service</th>
+                        <th>Status</th>
+                        <th>Actions</th>
+                    </tr>
+                </thead>
+
+                <tbody>
+
+                    <tr>
+                        <td>Dashboard</td>
+                        <td><span id="dashboard" class="status-badge"></span></td>
+                        <td class="actions">
+                            <button onclick="serviceAction('dashboard.service', 'start')">Start</button>
+                            <button onclick="serviceAction('dashboard.service', 'stop')">Stop</button>
+                            <button onclick="serviceAction('dashboard.service', 'restart')">Restart</button>
+                        </td>
+                    </tr>
+
+                    <tr>
+                        <td>Navidrome</td>
+                        <td><span id="navidrome" class="status-badge"></span></td>
+                        <td class="actions">
+                            <button onclick="serviceAction('navidrome', 'start')">Start</button>
+                            <button onclick="serviceAction('navidrome', 'stop')">Stop</button>
+                            <button onclick="serviceAction('navidrome', 'restart')">Restart</button>
+                        </td>
+                    </tr>
+
+                    <tr>
+                        <td>Syncthing</td>
+                        <td><span id="syncthing" class="status-badge"></span></td>
+                        <td class="actions">
+                            <button onclick="serviceAction('syncthing@lallost', 'start')">Start</button>
+                            <button onclick="serviceAction('syncthing@lallost', 'stop')">Stop</button>
+                            <button onclick="serviceAction('syncthing@lallost', 'restart')">Restart</button>
+                        </td>
+                    </tr>
+
+                    <tr>
+                        <td>Tailscale</td>
+                        <td><span id="tailscale" class="status-badge"></span></td>
+                        <td class="actions">
+                            <button onclick="serviceAction('tailscaled', 'start')">Start</button>
+                            <button onclick="serviceAction('tailscaled', 'stop')">Stop</button>
+                            <button onclick="serviceAction('tailscaled', 'restart')">Restart</button>
+                        </td>
+                    </tr>
+
+                    <tr>
+                        <td>WayVNC</td>
+                        <td><span id="wayvnc" class="status-badge"></span></td>
+                        <td class="actions">
+                            <button onclick="serviceAction('wayvnc', 'start')">Start</button>
+                            <button onclick="serviceAction('wayvnc', 'stop')">Stop</button>
+                            <button onclick="serviceAction('wayvnc', 'restart')">Restart</button>
+                        </td>
+                    </tr>
+
+                    <tr>
+                        <td>WayVNC Control</td>
+                        <td><span id="wayvnc_control" class="status-badge"></span></td>
+                        <td class="actions">
+                            <button onclick="serviceAction('wayvnc-control', 'start')">Start</button>
+                            <button onclick="serviceAction('wayvnc-control', 'stop')">Stop</button>
+                            <button onclick="serviceAction('wayvnc-control', 'restart')">Restart</button>
+                        </td>
+                    </tr>
+
+                    <tr>
+                        <td>VNC X11</td>
+                        <td><span id="vnc_x11" class="status-badge"></span></td>
+                        <td class="actions">
+                            <button onclick="serviceAction('vncserver-x11-serviced', 'start')">Start</button>
+                            <button onclick="serviceAction('vncserver-x11-serviced', 'stop')">Stop</button>
+                            <button onclick="serviceAction('vncserver-x11-serviced', 'restart')">Restart</button>
+                        </td>
+                    </tr>
+
+                    <tr>
+                        <td>SSH</td>
+                        <td><span id="ssh" class="status-badge"></span></td>
+                        <td class="actions">
+                            <button onclick="serviceAction('ssh', 'start')">Start</button>
+                            <button onclick="serviceAction('ssh', 'stop')">Stop</button>
+                            <button onclick="serviceAction('ssh', 'restart')">Restart</button>
+                        </td>
+                    </tr>
+
+                    <tr>
+                        <td>Cron</td>
+                        <td><span id="cron" class="status-badge"></span></td>
+                        <td class="actions">
+                            <button onclick="serviceAction('cron', 'start')">Start</button>
+                            <button onclick="serviceAction('cron', 'stop')">Stop</button>
+                            <button onclick="serviceAction('cron', 'restart')">Restart</button>
+                        </td>
+                    </tr>
+
+                    <tr>
+                        <td>Network</td>
+                        <td><span id="network" class="status-badge"></span></td>
+                        <td class="actions">
+                            <button onclick="serviceAction('NetworkManager', 'start')">Start</button>
+                            <button onclick="serviceAction('NetworkManager', 'stop')">Stop</button>
+                            <button onclick="serviceAction('NetworkManager', 'restart')">Restart</button>
+                        </td>
+                    </tr>
+
+                    <tr>
+                        <td>WiFi</td>
+                        <td><span id="wifi" class="status-badge"></span></td>
+                        <td class="actions">
+                            <button onclick="serviceAction('wpa_supplicant', 'start')">Start</button>
+                            <button onclick="serviceAction('wpa_supplicant', 'stop')">Stop</button>
+                            <button onclick="serviceAction('wpa_supplicant', 'restart')">Restart</button>
+                        </td>
+                    </tr>
+
+                </tbody>
+            </table>
         </div>
+
+
 
     </div>
 

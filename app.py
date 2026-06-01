@@ -1,4 +1,4 @@
-from flask import Flask, render_template, jsonify
+from flask import Flask, render_template, jsonify, request
 import subprocess
 import json
 import os
@@ -37,6 +37,11 @@ def index():
 def safe_run(cmd):
     try:
         return subprocess.check_output(cmd, shell=True).decode().strip()
+    except subprocess.CalledProcessError as e:
+        # systemctl is-active returns exit code 3 for inactive/disabled
+        if e.returncode == 3:
+            return "inactive"
+        return "error"
     except:
         return "error"
 
@@ -54,14 +59,19 @@ def status():
         "uptime": safe_run("uptime -p"),
 
         # SERVIZI IMPORTANTI
+        "dashboard": safe_run("systemctl is-active dashboard"),
         "navidrome": safe_run("systemctl is-active navidrome"),
         "syncthing": safe_run("systemctl is-active syncthing@lallost"),
         "tailscale": safe_run("systemctl is-active tailscaled"),
-        "ssh": safe_run("systemctl is-active ssh"),
+        "wayvnc": safe_run("systemctl is-active wayvnc"),
+        "wayvnc_control": safe_run("systemctl is-active wayvnc-control"),
+        "vnc_x11": safe_run("systemctl is-active vncserver-x11-serviced"),
+
+        # SERVIZI DI SISTEMA IMPORTANTI
         "cron": safe_run("systemctl is-active cron"),
+        "ssh": safe_run("systemctl is-active ssh"),
         "network": safe_run("systemctl is-active NetworkManager"),
-        "wifi": safe_run("systemctl is-active wpa_supplicant"),
-        "dashboard": safe_run("systemctl is-active dashboard")
+        "wifi": safe_run("systemctl is-active wpa_supplicant")
     }
 
     return jsonify(data)
@@ -109,6 +119,43 @@ def api_cpu_percent():
         print("CPU ERROR:", e)
         return jsonify({"cpu": None}), 500
 
+@app.route("/api/service/<action>")
+def api_service_action(action):
+    name = request.args.get("name")
+
+    if not name:
+        print("ERROR: Missing service name")
+        return jsonify({"error": "Missing service name"}), 400
+
+    if action not in ["start", "stop", "restart"]:
+        print("ERROR: Invalid action:", action)
+        return jsonify({"error": "Invalid action"}), 400
+
+    try:
+        output = subprocess.check_output(
+            ["sudo", "systemctl", action, name],
+            stderr=subprocess.STDOUT
+        ).decode().strip()
+
+        return jsonify({
+            "service": name,
+            "action": action,
+            "status": "ok",
+            "output": output
+        })
+
+    except subprocess.CalledProcessError as e:
+        print("SYSTEMCTL ERROR:", e.output.decode())
+        return jsonify({
+            "service": name,
+            "action": action,
+            "status": "failed",
+            "output": e.output.decode()
+        }), 500
+
+    except Exception as e:
+        print("UNEXPECTED ERROR:", str(e))
+        return jsonify({"error": "Unexpected error"}), 500
 
 if __name__ == "__main__":
     app.run(host="0.0.0.0", port=8080)
