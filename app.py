@@ -37,6 +37,11 @@ def index():
 def safe_run(cmd):
     try:
         return subprocess.check_output(cmd, shell=True).decode().strip()
+    except subprocess.CalledProcessError as e:
+        # systemctl is-active returns exit code 3 for inactive/disabled
+        if e.returncode == 3:
+            return "inactive"
+        return "error"
     except:
         return "error"
 
@@ -54,14 +59,19 @@ def status():
         "uptime": safe_run("uptime -p"),
 
         # SERVIZI IMPORTANTI
+        "dashboard": safe_run("systemctl is-active dashboard"),
         "navidrome": safe_run("systemctl is-active navidrome"),
         "syncthing": safe_run("systemctl is-active syncthing@lallost"),
         "tailscale": safe_run("systemctl is-active tailscaled"),
-        "ssh": safe_run("systemctl is-active ssh"),
+        "wayvnc": safe_run("systemctl is-active wayvnc"),
+        "wayvnc_control": safe_run("systemctl is-active wayvnc-control"),
+        "vnc_x11": safe_run("systemctl is-active vncserver-x11-serviced"),
+
+        # SERVIZI DI SISTEMA IMPORTANTI
         "cron": safe_run("systemctl is-active cron"),
+        "ssh": safe_run("systemctl is-active ssh"),
         "network": safe_run("systemctl is-active NetworkManager"),
-        "wifi": safe_run("systemctl is-active wpa_supplicant"),
-        "dashboard": safe_run("systemctl is-active dashboard")
+        "wifi": safe_run("systemctl is-active wpa_supplicant")
     }
 
     return jsonify(data)

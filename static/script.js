@@ -54,14 +54,18 @@ async function update() {
 
     setCpu(data.cpu);
 
+    setStatus("dashboard", data.dashboard);
     setStatus("navidrome", data.navidrome);
     setStatus("syncthing", data.syncthing);
     setStatus("tailscale", data.tailscale);
+    setStatus("wayvnc", data.wayvnc);
+    setStatus("wayvnc_control", data.wayvnc_control);
+    setStatus("vnc_x11", data.vnc_x11);
+
     setStatus("ssh", data.ssh);
     setStatus("cron", data.cron);
     setStatus("network", data.network);
     setStatus("wifi", data.wifi);
-    setStatus("dashboard", data.dashboard);
 
     document.getElementById("temp").textContent = data.temp;
 
