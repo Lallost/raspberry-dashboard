@@ -54,6 +54,14 @@ async function update() {
 
     setCpu(data.cpu);
 
+    document.getElementById("ramUsed").textContent = data.ram_used;
+    document.getElementById("ramTotal").textContent = data.ram_total;
+    document.getElementById("ramPercent").textContent = data.ram_percent;
+
+    document.getElementById("ramRealUsed").textContent = data.ram_real_used;
+    document.getElementById("ramRealPercent").textContent = data.ram_real_percent;
+    document.getElementById("ramTotal2").textContent = data.ram_total;
+
     setStatus("dashboard", data.dashboard);
     setStatus("navidrome", data.navidrome);
     setStatus("syncthing", data.syncthing);
@@ -256,4 +264,50 @@ setInterval(() => {
 
 
 
+// === RAM LIVE CHART ===
+
+// Serie dati RAM
+const ramSeries = new TimeSeries();
+
+// Configura il grafico RAM
+const ramChart = new SmoothieChart({
+    millisPerPixel: 100,
+    grid: {
+        strokeStyle: 'rgba(255,255,255,0.1)',
+        lineWidth: 1,
+        millisPerLine: 5000,
+        verticalSections: 4
+    },
+    labels: { fillStyle: '#ffffff' }
+});
+
+// Collega la serie al canvas
+ramChart.addTimeSeries(ramSeries, {
+    strokeStyle: 'rgba(0, 255, 150, 1)',
+    lineWidth: 2
+});
+
+// Avvia il grafico
+ramChart.streamTo(document.getElementById("ramChart"), 1000);
+
+let ramMin = null;
+let ramMax = null;
+
+setInterval(() => {
+    fetch("/api/status")
+        .then(r => r.json())
+        .then(data => {
+            const ram = data.ram_percent;
+
+            // Aggiorna grafico
+            ramSeries.append(Date.now(), ram);
+
+            // Aggiorna min/max
+            if (ramMin === null || ram < ramMin) ramMin = ram;
+            if (ramMax === null || ram > ramMax) ramMax = ram;
+
+            document.getElementById("ramMin").textContent = ramMin.toFixed(1);
+            document.getElementById("ramMax").textContent = ramMax.toFixed(1);
+        });
+}, 1000);
 

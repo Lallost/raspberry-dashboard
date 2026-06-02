@@ -45,6 +45,20 @@
                 <p><strong>I/O Wait:</strong> <span id="cpu-wait"></span></p>
             </div>
 
+            <p>
+                <strong>RAM:</strong>
+                <span id="ramUsed">-</span> / <span id="ramTotal">-</span> GB
+                (<span id="ramPercent">-</span>%)
+            </p>
+
+            <p>
+                <strong>RAM Reale:</strong>
+                <span id="ramRealUsed">-</span> / <span id="ramTotal2">-</span> GB
+                (<span id="ramRealPercent">-</span>%)
+            </p>
+
+
+
             <p><strong>Temperature:</strong> <span id="temp"></span></p>
             <p><strong>Uptime:</strong> <span id="uptime"></span></p>
 
@@ -71,6 +85,15 @@
                     <div>Max: <span id="cpuMax">--</span>%</div>
                     <div>Min: <span id="cpuMin">--</span>%</div>
                 </div>
+            </div>
+
+            <!-- RIGA RAM -->
+            <div style="display:flex; align-items:center; gap:15px; margin-top:10px;">
+                <canvas id="ramChart" width="300" height="80"></canvas>
+                    <div style="color:white; font-size:14px; line-height:1.4;">
+                        <div>Max: <span id="ramMax">--</span>%</div>
+                        <div>Min: <span id="ramMin">--</span>%</div>
+                    </div>
             </div>
 
         </div>
@@ -127,7 +150,7 @@
                         <td><span id="dashboard" class="status-badge"></span></td>
                         <td class="actions">
                             <button onclick="serviceAction('dashboard.service', 'start')">Start</button>
-                            <button onclick="serviceAction('dashboard.service', 'stop')">Stop</button>
+                            <!-- <button onclick="serviceAction('dashboard.service', 'stop')">Stop</button> -->
                             <button onclick="serviceAction('dashboard.service', 'restart')">Restart</button>
                         </td>
                     </tr>
@@ -157,7 +180,7 @@
                         <td><span id="tailscale" class="status-badge"></span></td>
                         <td class="actions">
                             <button onclick="serviceAction('tailscaled', 'start')">Start</button>
-                            <button onclick="serviceAction('tailscaled', 'stop')">Stop</button>
+                            <!-- <button onclick="serviceAction('tailscaled', 'stop')">Stop</button> -->
                             <button onclick="serviceAction('tailscaled', 'restart')">Restart</button>
                         </td>
                     </tr>
@@ -197,7 +220,7 @@
                         <td><span id="ssh" class="status-badge"></span></td>
                         <td class="actions">
                             <button onclick="serviceAction('ssh', 'start')">Start</button>
-                            <button onclick="serviceAction('ssh', 'stop')">Stop</button>
+                            <!-- <button onclick="serviceAction('ssh', 'stop')">Stop</button> -->
                             <button onclick="serviceAction('ssh', 'restart')">Restart</button>
                         </td>
                     </tr>
@@ -217,7 +240,7 @@
                         <td><span id="network" class="status-badge"></span></td>
                         <td class="actions">
                             <button onclick="serviceAction('NetworkManager', 'start')">Start</button>
-                            <button onclick="serviceAction('NetworkManager', 'stop')">Stop</button>
+                            <!-- <button onclick="serviceAction('NetworkManager', 'stop')">Stop</button> -->
                             <button onclick="serviceAction('NetworkManager', 'restart')">Restart</button>
                         </td>
                     </tr>
@@ -227,7 +250,7 @@
                         <td><span id="wifi" class="status-badge"></span></td>
                         <td class="actions">
                             <button onclick="serviceAction('wpa_supplicant', 'start')">Start</button>
-                            <button onclick="serviceAction('wpa_supplicant', 'stop')">Stop</button>
+                            <!-- <button onclick="serviceAction('wpa_supplicant', 'stop')">Stop</button> -->
                             <button onclick="serviceAction('wpa_supplicant', 'restart')">Restart</button>
                         </td>
                     </tr>
@@ -235,8 +258,6 @@
                 </tbody>
             </table>
         </div>
-
-
 
     </div>
 

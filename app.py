@@ -56,6 +56,15 @@ def status():
         "temp": safe_run("vcgencmd measure_temp"),
         "disk": safe_run("df -h / | grep '/'"),
         "usb": safe_run("df -h /mnt/music | grep '/'"),
+        
+        # RAM
+        "ram_total": round(psutil.virtual_memory().total / (1024**3), 2),
+        "ram_used": round(psutil.virtual_memory().used / (1024**3), 2),
+        "ram_percent": psutil.virtual_memory().percent,
+        "ram_real_used": round((psutil.virtual_memory().total - psutil.virtual_memory().available) / (1024**3), 2),
+        "ram_real_percent": round((1 - psutil.virtual_memory().available / psutil.virtual_memory().total) * 100, 2),
+
+
         "uptime": safe_run("uptime -p"),
 
         # SERVIZI IMPORTANTI
