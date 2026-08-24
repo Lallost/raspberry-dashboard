@@ -206,6 +206,7 @@ setInterval(() => {
             }
 
             // 🔥 AGGIUNGI QUESTE 2 RIGHE QUI
+            document.getElementById("curTemp").textContent = data.temperature;
             document.getElementById("maxTemp").textContent = data.max;
             document.getElementById("minTemp").textContent = data.min;
         })
@@ -257,6 +258,7 @@ setInterval(() => {
             if (cpuMin === null || cpu < cpuMin) cpuMin = cpu;
             if (cpuMax === null || cpu > cpuMax) cpuMax = cpu;
 
+            document.getElementById("cpuNow").textContent = cpu.toFixed(1);
             document.getElementById("cpuMin").textContent = cpuMin.toFixed(1);
             document.getElementById("cpuMax").textContent = cpuMax.toFixed(1);
         });
@@ -306,6 +308,7 @@ setInterval(() => {
             if (ramMin === null || ram < ramMin) ramMin = ram;
             if (ramMax === null || ram > ramMax) ramMax = ram;
 
+            document.getElementById("ramNow").textContent = ram.toFixed(1);
             document.getElementById("ramMin").textContent = ramMin.toFixed(1);
             document.getElementById("ramMax").textContent = ramMax.toFixed(1);
         });
