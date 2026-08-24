@@ -68,29 +68,35 @@
         <div style="display:block; width:100%;">
 
             <!-- RIGA TEMPERATURA -->
+            <p style="margin:10px 0 4px 0; font-weight:bold; color:#e0e0e0;">Temperature</p>
             <div style="display:flex; align-items:center; gap:15px; margin-top:10px;">
                 <canvas id="tempChart" width="300" height="80"></canvas>
 
                 <div style="color:white; font-size:14px; line-height:1.4;">
+                    <div>Now: <span id="curTemp">--</span>°C</div>
                     <div>Max: <span id="maxTemp">--</span>°C</div>
                     <div>Min: <span id="minTemp">--</span>°C</div>
                 </div>
             </div>
 
             <!-- RIGA CPU -->
+            <p style="margin:10px 0 4px 0; font-weight:bold; color:#e0e0e0;">CPU</p>
             <div style="display:flex; align-items:center; gap:15px; margin-top:10px;">
                 <canvas id="cpuChart" width="300" height="80"></canvas>
 
                 <div style="color:white; font-size:14px; line-height:1.4;">
+                    <div>Now: <span id="cpuNow">--</span>%</div>
                     <div>Max: <span id="cpuMax">--</span>%</div>
                     <div>Min: <span id="cpuMin">--</span>%</div>
                 </div>
             </div>
 
             <!-- RIGA RAM -->
+            <p style="margin:10px 0 4px 0; font-weight:bold; color:#e0e0e0;">RAM</p>
             <div style="display:flex; align-items:center; gap:15px; margin-top:10px;">
                 <canvas id="ramChart" width="300" height="80"></canvas>
                     <div style="color:white; font-size:14px; line-height:1.4;">
+                        <div>Now: <span id="ramNow">--</span>%</div>
                         <div>Max: <span id="ramMax">--</span>%</div>
                         <div>Min: <span id="ramMin">--</span>%</div>
                     </div>
@@ -262,7 +268,7 @@
     </div>
 
     <script src="{{ url_for('static', filename='smoothie.js') }}"></script>
-    <script src="{{ url_for('static', filename='script.js') }}?v=15"></script>
+    <script src="{{ url_for('static', filename='script.js') }}?v=16"></script>
 
     <footer style="position: fixed; bottom: 10px; right: 10px; opacity: 0.6; font-size: 0.8rem;">
         v{{ metadata.version }} – {{ metadata.release_date }}
