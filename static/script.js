@@ -160,6 +160,32 @@ function serviceAction(name, action) {
         .catch(err => alert("Errore: " + err));
 }
 
+// === RESET MAX/MIN ===
+// metric: 'temperature' | 'cpu' | 'ram'
+function resetStats(metric) {
+    fetch(`/api/reset_stats/${metric}`)
+        .then(r => r.json())
+        .then(() => {
+            if (metric === 'temperature') {
+                tempChart.options.minValue = undefined;
+                tempChart.options.maxValue = undefined;
+                document.getElementById("maxTemp").textContent = '--';
+                document.getElementById("minTemp").textContent = '--';
+            } else if (metric === 'cpu') {
+                cpuChart.options.minValue = undefined;
+                cpuChart.options.maxValue = undefined;
+                document.getElementById("cpuMax").textContent = '--';
+                document.getElementById("cpuMin").textContent = '--';
+            } else if (metric === 'ram') {
+                ramChart.options.minValue = undefined;
+                ramChart.options.maxValue = undefined;
+                document.getElementById("ramMax").textContent = '--';
+                document.getElementById("ramMin").textContent = '--';
+            }
+        })
+        .catch(err => alert("Errore reset: " + err));
+}
+
 
 update();
 setInterval(update, 3000);
@@ -209,6 +235,14 @@ setInterval(() => {
             document.getElementById("curTemp").textContent = data.temperature;
             document.getElementById("maxTemp").textContent = data.max;
             document.getElementById("minTemp").textContent = data.min;
+
+            // Blocca la scala del grafico sul massimo e minimo registrati
+            if (data.max !== null && data.max !== undefined) {
+                tempChart.options.maxValue = parseFloat(data.max);
+            }
+            if (data.min !== null && data.min !== undefined) {
+                tempChart.options.minValue = parseFloat(data.min);
+            }
         })
         .catch(() => {
             tempSeries.append(Date.now(), null);
@@ -241,10 +275,6 @@ cpuChart.addTimeSeries(cpuSeries, {
 // Avvia il grafico
 cpuChart.streamTo(document.getElementById("cpuChart"), 1000);
 
-// Min/Max CPU
-let cpuMin = null;
-let cpuMax = null;
-
 // Aggiorna ogni secondo
 setInterval(() => {
     fetch("/api/cpu_percent")
@@ -254,13 +284,17 @@ setInterval(() => {
 
             cpuSeries.append(Date.now(), cpu);
 
-            // Aggiorna min/max
-            if (cpuMin === null || cpu < cpuMin) cpuMin = cpu;
-            if (cpuMax === null || cpu > cpuMax) cpuMax = cpu;
+            // Max/min registrati (persistiti lato server) - bloccano la scala del grafico
+            if (data.max !== null && data.max !== undefined) {
+                cpuChart.options.maxValue = data.max;
+            }
+            if (data.min !== null && data.min !== undefined) {
+                cpuChart.options.minValue = data.min;
+            }
 
             document.getElementById("cpuNow").textContent = cpu.toFixed(1);
-            document.getElementById("cpuMin").textContent = cpuMin.toFixed(1);
-            document.getElementById("cpuMax").textContent = cpuMax.toFixed(1);
+            document.getElementById("cpuMin").textContent = (data.min ?? cpu).toFixed(1);
+            document.getElementById("cpuMax").textContent = (data.max ?? cpu).toFixed(1);
         });
 }, 1000);
 
@@ -292,9 +326,6 @@ ramChart.addTimeSeries(ramSeries, {
 // Avvia il grafico
 ramChart.streamTo(document.getElementById("ramChart"), 1000);
 
-let ramMin = null;
-let ramMax = null;
-
 setInterval(() => {
     fetch("/api/status")
         .then(r => r.json())
@@ -304,13 +335,17 @@ setInterval(() => {
             // Aggiorna grafico
             ramSeries.append(Date.now(), ram);
 
-            // Aggiorna min/max
-            if (ramMin === null || ram < ramMin) ramMin = ram;
-            if (ramMax === null || ram > ramMax) ramMax = ram;
+            // Max/min registrati (persistiti lato server) - bloccano la scala del grafico
+            if (data.ram_max !== null && data.ram_max !== undefined) {
+                ramChart.options.maxValue = data.ram_max;
+            }
+            if (data.ram_min !== null && data.ram_min !== undefined) {
+                ramChart.options.minValue = data.ram_min;
+            }
 
             document.getElementById("ramNow").textContent = ram.toFixed(1);
-            document.getElementById("ramMin").textContent = ramMin.toFixed(1);
-            document.getElementById("ramMax").textContent = ramMax.toFixed(1);
+            document.getElementById("ramMin").textContent = (data.ram_min ?? ram).toFixed(1);
+            document.getElementById("ramMax").textContent = (data.ram_max ?? ram).toFixed(1);
         });
 }, 1000);
 

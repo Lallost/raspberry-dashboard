@@ -7,23 +7,42 @@ import psutil
 with open("metadata.json") as f:
     METADATA = json.load(f)
 
-STATS_FILE = "data/temperature_stats.json"
+STATS_FILES = {
+    "temperature": "data/temperature_stats.json",
+    "cpu": "data/cpu_stats.json",
+    "ram": "data/ram_stats.json",
+}
 
-def load_temp_stats():
+def load_stats(metric):
     # Se il file non esiste o è corrotto, torna ai valori di default
+    path = STATS_FILES[metric]
     try:
-        if not os.path.exists(STATS_FILE):
+        if not os.path.exists(path):
             return {"max": None, "min": None}
-        with open(STATS_FILE, "r") as f:
+        with open(path, "r") as f:
             return json.load(f)
     except:
         return {"max": None, "min": None}
 
-def save_temp_stats(stats):
+def save_stats(metric, stats):
     # Assicura che la cartella data/ esista
-    os.makedirs(os.path.dirname(STATS_FILE), exist_ok=True)
-    with open(STATS_FILE, "w") as f:
+    path = STATS_FILES[metric]
+    os.makedirs(os.path.dirname(path), exist_ok=True)
+    with open(path, "w") as f:
         json.dump(stats, f)
+
+def update_stats(metric, value):
+    # Aggiorna max/min registrati per una metrica e li salva su disco
+    stats = load_stats(metric)
+
+    if stats["max"] is None or value > stats["max"]:
+        stats["max"] = value
+
+    if stats["min"] is None or value < stats["min"]:
+        stats["min"] = value
+
+    save_stats(metric, stats)
+    return stats
 
 app = Flask(__name__)
 
@@ -51,16 +70,21 @@ def get_cpu_percent():
 
 @app.route("/api/status")
 def status():
+    ram_percent = psutil.virtual_memory().percent
+    ram_stats = update_stats("ram", ram_percent)
+
     data = {
         "cpu": safe_run("top -bn1 | grep 'Cpu(s)'"),
         "temp": safe_run("vcgencmd measure_temp"),
         "disk": safe_run("df -h / | grep '/'"),
         "usb": safe_run("df -h /mnt/music | grep '/'"),
-        
+
         # RAM
         "ram_total": round(psutil.virtual_memory().total / (1024**3), 2),
         "ram_used": round(psutil.virtual_memory().used / (1024**3), 2),
-        "ram_percent": psutil.virtual_memory().percent,
+        "ram_percent": ram_percent,
+        "ram_max": ram_stats["max"],
+        "ram_min": ram_stats["min"],
         "ram_real_used": round((psutil.virtual_memory().total - psutil.virtual_memory().available) / (1024**3), 2),
         "ram_real_percent": round((1 - psutil.virtual_memory().available / psutil.virtual_memory().total) * 100, 2),
 
@@ -94,24 +118,14 @@ def api_temperature():
         value = float(raw.replace("temp=", "").replace("'C", ""))
     except:
         # Se non riesco a parsare, non tocco i record
-        stats = load_temp_stats()
+        stats = load_stats("temperature")
         return jsonify({
             "temperature": None,
             "max": stats["max"],
             "min": stats["min"]
         })
 
-    stats = load_temp_stats()
-
-    # Aggiorna max
-    if stats["max"] is None or value > stats["max"]:
-        stats["max"] = value
-
-    # Aggiorna min
-    if stats["min"] is None or value < stats["min"]:
-        stats["min"] = value
-
-    save_temp_stats(stats)
+    stats = update_stats("temperature", value)
 
     return jsonify({
         "temperature": value,
@@ -123,10 +137,21 @@ def api_temperature():
 def api_cpu_percent():
     try:
         cpu = get_cpu_percent()
-        return jsonify({"cpu": cpu})
+        stats = update_stats("cpu", cpu)
+        return jsonify({"cpu": cpu, "max": stats["max"], "min": stats["min"]})
     except Exception as e:
         print("CPU ERROR:", e)
         return jsonify({"cpu": None}), 500
+
+@app.route("/api/reset_stats/<metric>")
+def api_reset_stats(metric):
+    if metric not in STATS_FILES:
+        return jsonify({"error": "Invalid metric"}), 400
+
+    stats = {"max": None, "min": None}
+    save_stats(metric, stats)
+
+    return jsonify({"status": "ok", "metric": metric, "max": stats["max"], "min": stats["min"]})
 
 @app.route("/api/service/<action>")
 def api_service_action(action):

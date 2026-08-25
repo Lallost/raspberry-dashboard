@@ -76,6 +76,7 @@
                     <div>Now: <span id="curTemp">--</span>°C</div>
                     <div>Max: <span id="maxTemp">--</span>°C</div>
                     <div>Min: <span id="minTemp">--</span>°C</div>
+                    <button onclick="resetStats('temperature')" style="margin-top:6px; padding:3px 8px; font-size:11px; cursor:pointer;">Reset max/min</button>
                 </div>
             </div>
 
@@ -88,6 +89,7 @@
                     <div>Now: <span id="cpuNow">--</span>%</div>
                     <div>Max: <span id="cpuMax">--</span>%</div>
                     <div>Min: <span id="cpuMin">--</span>%</div>
+                    <button onclick="resetStats('cpu')" style="margin-top:6px; padding:3px 8px; font-size:11px; cursor:pointer;">Reset max/min</button>
                 </div>
             </div>
 
@@ -99,6 +101,7 @@
                         <div>Now: <span id="ramNow">--</span>%</div>
                         <div>Max: <span id="ramMax">--</span>%</div>
                         <div>Min: <span id="ramMin">--</span>%</div>
+                        <button onclick="resetStats('ram')" style="margin-top:6px; padding:3px 8px; font-size:11px; cursor:pointer;">Reset max/min</button>
                     </div>
             </div>
 
@@ -268,7 +271,7 @@
     </div>
 
     <script src="{{ url_for('static', filename='smoothie.js') }}"></script>
-    <script src="{{ url_for('static', filename='script.js') }}?v=16"></script>
+    <script src="{{ url_for('static', filename='script.js') }}?v=17"></script>
 
     <footer style="position: fixed; bottom: 10px; right: 10px; opacity: 0.6; font-size: 0.8rem;">
         v{{ metadata.version }} – {{ metadata.release_date }}
