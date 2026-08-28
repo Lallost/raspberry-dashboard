@@ -280,6 +280,18 @@ def api_wifi_band(band):
             ["sudo", "nmcli", "connection", "modify", conn_name, "802-11-wireless.band", band_value],
             stderr=subprocess.STDOUT
         )
+
+        # Se la connessione è già attiva, un semplice "connection up" spesso non
+        # forza una vera riassociazione (NetworkManager la considera già
+        # soddisfatta e ignora che la banda è cambiata). Il "down" esplicito
+        # garantisce che il cambio banda abbia effetto subito, non in ritardo.
+        # Ignoriamo eventuali errori del down (es. se per qualche motivo non
+        # risultava già attiva): quello che conta è il risultato dell'up dopo.
+        subprocess.run(
+            ["sudo", "nmcli", "connection", "down", conn_name],
+            stdout=subprocess.PIPE, stderr=subprocess.STDOUT
+        )
+
         output = subprocess.check_output(
             ["sudo", "nmcli", "connection", "up", conn_name],
             stderr=subprocess.STDOUT
