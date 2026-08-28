@@ -82,26 +82,37 @@ function toggleWifiBand() {
 
     const target = currentWifiBand === "2.4" ? "5" : "2.4";
     const btn = document.getElementById("wifiBandToggle");
+    const msg = document.getElementById("wifiBandMsg");
     const label = btn.textContent;
 
     btn.disabled = true;
     btn.textContent = "Cambio in corso...";
+    msg.textContent = "";
+    msg.style.color = "#ccc";
 
+    // Niente alert(): è bloccante e congela anche il ciclo di aggiornamento
+    // automatico della pagina finché non lo chiudi, dando l'impressione che
+    // il cambio non sia andato a buon fine. Messaggio inline invece.
     fetch(`/api/wifi_band/${target}`)
         .then(r => r.json())
         .then(data => {
             btn.disabled = false;
             btn.textContent = label;
             if (data.status === "ok") {
-                alert(`Passaggio a ${target}GHz avviato. Il WiFi si riaggancia in qualche secondo, poi la dashboard si aggiorna da sola.`);
+                msg.style.color = "#28a745";
+                msg.textContent = `Passato a ${target}GHz`;
+                setTimeout(() => { msg.textContent = ""; }, 5000);
+                update(); // aggiorna subito la riga WiFi invece di aspettare il prossimo giro
             } else {
-                alert("Errore nel cambio banda:\n" + (data.output || data.error || "sconosciuto"));
+                msg.style.color = "#dc3545";
+                msg.textContent = "Errore: " + (data.output || data.error || "sconosciuto");
             }
         })
         .catch(err => {
             btn.disabled = false;
             btn.textContent = label;
-            alert("Errore: " + err);
+            msg.style.color = "#dc3545";
+            msg.textContent = "Errore: " + err;
         });
 }
 

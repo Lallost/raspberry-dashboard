@@ -64,6 +64,7 @@
             <p>
                 <strong>WiFi:</strong> <span id="wifiQuality">--</span>
                 <button id="wifiBandToggle" onclick="toggleWifiBand()" style="display:none; margin-left:8px; padding:3px 8px; font-size:11px; cursor:pointer;"></button>
+                <span id="wifiBandMsg" style="margin-left:8px; font-size:12px;"></span>
             </p>
 
         </div>
@@ -301,7 +302,7 @@
     </div>
 
     <script src="{{ url_for('static', filename='smoothie.js') }}"></script>
-    <script src="{{ url_for('static', filename='script.js') }}?v=20"></script>
+    <script src="{{ url_for('static', filename='script.js') }}?v=21"></script>
 
     <footer style="position: fixed; bottom: 10px; right: 10px; opacity: 0.6; font-size: 0.8rem;">
         v{{ metadata.version }} – {{ metadata.release_date }}

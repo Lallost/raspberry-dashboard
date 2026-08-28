@@ -292,10 +292,24 @@ def api_wifi_band(band):
             stdout=subprocess.PIPE, stderr=subprocess.STDOUT
         )
 
-        output = subprocess.check_output(
-            ["sudo", "nmcli", "connection", "up", conn_name],
-            stderr=subprocess.STDOUT
-        ).decode().strip()
+        # Piccola pausa: subito dopo il "down" la scansione WiFi può non avere
+        # ancora un risultato fresco per l'access point sulla nuova banda, e
+        # un "up" troppo immediato a volte fallisce a trovarlo (fallimento
+        # intermittente osservato in test). Un retry con una pausa più lunga
+        # risolve la stragrande maggioranza dei casi.
+        time.sleep(2)
+
+        try:
+            output = subprocess.check_output(
+                ["sudo", "nmcli", "connection", "up", conn_name],
+                stderr=subprocess.STDOUT
+            ).decode().strip()
+        except subprocess.CalledProcessError:
+            time.sleep(3)
+            output = subprocess.check_output(
+                ["sudo", "nmcli", "connection", "up", conn_name],
+                stderr=subprocess.STDOUT
+            ).decode().strip()
 
         return jsonify({"status": "ok", "connection": conn_name, "band": band, "output": output})
 
