@@ -122,6 +122,7 @@ def get_wifi_status():
         return {"connected": False}
 
     ssid_match = re.search(r"SSID:\s*(.+)", raw)
+    freq_match = re.search(r"freq:\s*(\d+)", raw)
     signal_dbm = int(signal_match.group(1))
 
     # Approssimazione standard dBm -> percentuale (-50dBm ~ 100%, -100dBm ~ 0%)
@@ -138,12 +139,22 @@ def get_wifi_status():
     else:
         label = "Molto debole"
 
+    # Banda dedotta dalla frequenza (2.4GHz: 2400-2500 MHz, 5GHz: 4900-5900 MHz)
+    band = None
+    if freq_match:
+        freq = int(freq_match.group(1))
+        if 2400 <= freq < 2500:
+            band = "2.4GHz"
+        elif 4900 <= freq < 5900:
+            band = "5GHz"
+
     return {
         "connected": True,
         "ssid": ssid_match.group(1).strip() if ssid_match else None,
         "signal_dbm": signal_dbm,
         "signal_percent": signal_percent,
-        "signal_label": label
+        "signal_label": label,
+        "band": band
     }
 
 @app.route("/api/status")
@@ -176,6 +187,7 @@ def status():
         "wifi_signal_dbm": wifi_status.get("signal_dbm"),
         "wifi_signal_percent": wifi_status.get("signal_percent"),
         "wifi_signal_label": wifi_status.get("signal_label"),
+        "wifi_band": wifi_status.get("band"),
 
         # SERVIZI IMPORTANTI
         "dashboard": safe_run("systemctl is-active dashboard"),
@@ -243,6 +255,49 @@ def api_network():
         "down_max": down_stats["max"],
         "down_min": down_stats["min"]
     })
+
+# Valori richiesti da "nmcli connection modify ... 802-11-wireless.band"
+WIFI_BAND_VALUES = {"2.4": "bg", "5": "a"}
+
+@app.route("/api/wifi_band/<band>")
+def api_wifi_band(band):
+    # Forza il profilo WiFi attualmente connesso su una banda specifica (2.4GHz o 5GHz).
+    # Richiede una regola sudoers NOPASSWD per nmcli (vedi README/setup) perché
+    # il servizio dashboard gira come utente non privilegiato.
+    if band not in WIFI_BAND_VALUES:
+        return jsonify({"error": "Banda non valida, usare '2.4' o '5'"}), 400
+
+    wifi_status = get_wifi_status()
+    if not wifi_status["connected"] or not wifi_status.get("ssid"):
+        return jsonify({"error": "WiFi non connesso, impossibile cambiare banda"}), 400
+
+    # I profili WiFi su questo Raspberry sono generati con questo naming (vedi wifi-sync.service)
+    conn_name = f"wifi-sync-{wifi_status['ssid']}"
+    band_value = WIFI_BAND_VALUES[band]
+
+    try:
+        subprocess.check_output(
+            ["sudo", "nmcli", "connection", "modify", conn_name, "802-11-wireless.band", band_value],
+            stderr=subprocess.STDOUT
+        )
+        output = subprocess.check_output(
+            ["sudo", "nmcli", "connection", "up", conn_name],
+            stderr=subprocess.STDOUT
+        ).decode().strip()
+
+        return jsonify({"status": "ok", "connection": conn_name, "band": band, "output": output})
+
+    except subprocess.CalledProcessError as e:
+        print("NMCLI BAND ERROR:", e.output.decode())
+        return jsonify({
+            "status": "failed",
+            "connection": conn_name,
+            "output": e.output.decode()
+        }), 500
+
+    except Exception as e:
+        print("UNEXPECTED ERROR:", str(e))
+        return jsonify({"error": "Unexpected error"}), 500
 
 @app.route("/api/reset_stats/<metric>")
 def api_reset_stats(metric):

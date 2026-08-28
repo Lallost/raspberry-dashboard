@@ -38,23 +38,71 @@ function setCpu(value) {
     else el.classList.add("status-error");
 }
 
+// Banda attualmente rilevata ("2.4" o "5"), usata da toggleWifiBand()
+let currentWifiBand = null;
+
 function setWifiQuality(data) {
     const el = document.getElementById("wifiQuality");
+    const btn = document.getElementById("wifiBandToggle");
 
     if (!data.wifi_connected) {
         el.textContent = "non connesso (probabile Ethernet)";
         el.style.color = "#888";
+        btn.style.display = "none";
+        currentWifiBand = null;
         return;
     }
 
     const ssid = data.wifi_ssid ?? "?";
     const percent = data.wifi_signal_percent;
+    const bandSuffix = data.wifi_band ? ` · ${data.wifi_band}` : "";
 
-    el.textContent = `${ssid} — ${data.wifi_signal_dbm} dBm (${percent}%, ${data.wifi_signal_label})`;
+    el.textContent = `${ssid} — ${data.wifi_signal_dbm} dBm (${percent}%, ${data.wifi_signal_label})${bandSuffix}`;
 
     if (percent >= 70) el.style.color = "#28a745";
     else if (percent >= 40) el.style.color = "#e0a800";
     else el.style.color = "#dc3545";
+
+    if (data.wifi_band === "2.4GHz") {
+        currentWifiBand = "2.4";
+        btn.textContent = "Passa a 5GHz";
+        btn.style.display = "inline-block";
+    } else if (data.wifi_band === "5GHz") {
+        currentWifiBand = "5";
+        btn.textContent = "Passa a 2.4GHz";
+        btn.style.display = "inline-block";
+    } else {
+        currentWifiBand = null;
+        btn.style.display = "none";
+    }
+}
+
+function toggleWifiBand() {
+    if (!currentWifiBand) return;
+
+    const target = currentWifiBand === "2.4" ? "5" : "2.4";
+    const btn = document.getElementById("wifiBandToggle");
+    const label = btn.textContent;
+
+    btn.disabled = true;
+    btn.textContent = "Cambio in corso...";
+
+    fetch(`/api/wifi_band/${target}`)
+        .then(r => r.json())
+        .then(data => {
+            btn.disabled = false;
+            btn.textContent = label;
+            if (data.status === "ok") {
+                alert(`Passaggio a ${target}GHz avviato. Il WiFi si riaggancia in qualche secondo, poi la dashboard si aggiorna da sola.`);
+            } else {
+                alert("Errore nel cambio banda:\n" + (data.output || data.error || "sconosciuto"));
+            }
+        })
+        .catch(err => {
+            btn.disabled = false;
+            btn.textContent = label;
+            alert("Errore: " + err);
+        });
 }
 
 function parseDisk(line) {
