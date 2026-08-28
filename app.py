@@ -2,6 +2,7 @@ from flask import Flask, render_template, jsonify, request
 import subprocess
 import json
 import os
+import re
 import time
 import psutil
 
@@ -110,10 +111,46 @@ def get_network_rates():
         "download_kbps": round(download_kbps, 2)
     }
 
+def get_wifi_status():
+    # Stato/qualità della connessione WiFi sull'interfaccia wlan0.
+    # "iw dev wlan0 link" stampa "Not connected." (senza errore) se wlan0
+    # non è associata (es. quando si usa il cavo Ethernet come principale).
+    raw = safe_run("iw dev wlan0 link")
+
+    signal_match = re.search(r"signal:\s*(-?\d+)\s*dBm", raw) if raw else None
+    if not signal_match:
+        return {"connected": False}
+
+    ssid_match = re.search(r"SSID:\s*(.+)", raw)
+    signal_dbm = int(signal_match.group(1))
+
+    # Approssimazione standard dBm -> percentuale (-50dBm ~ 100%, -100dBm ~ 0%)
+    signal_percent = max(0, min(100, 2 * (signal_dbm + 100)))
+
+    if signal_percent >= 80:
+        label = "Ottima"
+    elif signal_percent >= 60:
+        label = "Buona"
+    elif signal_percent >= 40:
+        label = "Discreta"
+    elif signal_percent >= 20:
+        label = "Debole"
+    else:
+        label = "Molto debole"
+
+    return {
+        "connected": True,
+        "ssid": ssid_match.group(1).strip() if ssid_match else None,
+        "signal_dbm": signal_dbm,
+        "signal_percent": signal_percent,
+        "signal_label": label
+    }
+
 @app.route("/api/status")
 def status():
     ram_percent = psutil.virtual_memory().percent
     ram_stats = update_stats("ram", ram_percent)
+    wifi_status = get_wifi_status()
 
     data = {
         "cpu": safe_run("top -bn1 | grep 'Cpu(s)'"),
@@ -132,6 +169,13 @@ def status():
 
 
         "uptime": safe_run("uptime -p"),
+
+        # WIFI
+        "wifi_connected": wifi_status["connected"],
+        "wifi_ssid": wifi_status.get("ssid"),
+        "wifi_signal_dbm": wifi_status.get("signal_dbm"),
+        "wifi_signal_percent": wifi_status.get("signal_percent"),
+        "wifi_signal_label": wifi_status.get("signal_label"),
 
         # SERVIZI IMPORTANTI
         "dashboard": safe_run("systemctl is-active dashboard"),

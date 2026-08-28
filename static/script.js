@@ -38,6 +38,25 @@ function setCpu(value) {
     else el.classList.add("status-error");
 }
 
+function setWifiQuality(data) {
+    const el = document.getElementById("wifiQuality");
+
+    if (!data.wifi_connected) {
+        el.textContent = "non connesso (probabile Ethernet)";
+        el.style.color = "#888";
+        return;
+    }
+
+    const ssid = data.wifi_ssid ?? "?";
+    const percent = data.wifi_signal_percent;
+
+    el.textContent = `${ssid} — ${data.wifi_signal_dbm} dBm (${percent}%, ${data.wifi_signal_label})`;
+
+    if (percent >= 70) el.style.color = "#28a745";
+    else if (percent >= 40) el.style.color = "#e0a800";
+    else el.style.color = "#dc3545";
+}
+
 function parseDisk(line) {
     const parts = line.split(/\s+/);
     return {
@@ -76,6 +95,8 @@ async function update() {
     setStatus("wifi", data.wifi);
 
     document.getElementById("temp").textContent = data.temp;
+
+    setWifiQuality(data);
 
     // SD
     const disk = parseDisk(data.disk);
