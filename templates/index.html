@@ -105,6 +105,32 @@
                     </div>
             </div>
 
+            <!-- RIGA NETWORK UPLOAD -->
+            <p style="margin:10px 0 4px 0; font-weight:bold; color:#e0e0e0;">Rete - Upload</p>
+            <div style="display:flex; align-items:center; gap:15px; margin-top:10px;">
+                <canvas id="netUpChart" width="300" height="80"></canvas>
+
+                <div style="color:white; font-size:14px; line-height:1.4;">
+                    <div>Now: <span id="netUpNow">--</span> KB/s</div>
+                    <div>Max: <span id="netUpMax">--</span> KB/s</div>
+                    <div>Min: <span id="netUpMin">--</span> KB/s</div>
+                    <button onclick="resetStats('net_up')" style="margin-top:6px; padding:3px 8px; font-size:11px; cursor:pointer;">Reset max/min</button>
+                </div>
+            </div>
+
+            <!-- RIGA NETWORK DOWNLOAD -->
+            <p style="margin:10px 0 4px 0; font-weight:bold; color:#e0e0e0;">Rete - Download</p>
+            <div style="display:flex; align-items:center; gap:15px; margin-top:10px;">
+                <canvas id="netDownChart" width="300" height="80"></canvas>
+
+                <div style="color:white; font-size:14px; line-height:1.4;">
+                    <div>Now: <span id="netDownNow">--</span> KB/s</div>
+                    <div>Max: <span id="netDownMax">--</span> KB/s</div>
+                    <div>Min: <span id="netDownMin">--</span> KB/s</div>
+                    <button onclick="resetStats('net_down')" style="margin-top:6px; padding:3px 8px; font-size:11px; cursor:pointer;">Reset max/min</button>
+                </div>
+            </div>
+
         </div>
 
         <!-- SD CARD -->
@@ -271,7 +297,7 @@
     </div>
 
     <script src="{{ url_for('static', filename='smoothie.js') }}"></script>
-    <script src="{{ url_for('static', filename='script.js') }}?v=17"></script>
+    <script src="{{ url_for('static', filename='script.js') }}?v=18"></script>
 
     <footer style="position: fixed; bottom: 10px; right: 10px; opacity: 0.6; font-size: 0.8rem;">
         v{{ metadata.version }} – {{ metadata.release_date }}

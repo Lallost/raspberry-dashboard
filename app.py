@@ -2,6 +2,7 @@ from flask import Flask, render_template, jsonify, request
 import subprocess
 import json
 import os
+import time
 import psutil
 
 with open("metadata.json") as f:
@@ -11,6 +12,8 @@ STATS_FILES = {
     "temperature": "data/temperature_stats.json",
     "cpu": "data/cpu_stats.json",
     "ram": "data/ram_stats.json",
+    "net_up": "data/net_up_stats.json",
+    "net_down": "data/net_down_stats.json",
 }
 
 def load_stats(metric):
@@ -67,6 +70,45 @@ def safe_run(cmd):
 def get_cpu_percent():
     # Ritorna la percentuale di utilizzo CPU senza bloccare il server
     return psutil.cpu_percent(interval=None)
+
+# Ultima lettura dei contatori di rete, per calcolare la velocità (bytes/sec)
+_net_last = {"time": None, "sent": None, "recv": None}
+
+def get_network_bytes():
+    # Somma i contatori di tutte le interfacce tranne il loopback
+    counters = psutil.net_io_counters(pernic=True)
+    sent = 0
+    recv = 0
+    for iface, c in counters.items():
+        if iface == "lo":
+            continue
+        sent += c.bytes_sent
+        recv += c.bytes_recv
+    return sent, recv
+
+def get_network_rates():
+    # Calcola upload/download in KB/s dal delta rispetto all'ultima chiamata
+    global _net_last
+    sent, recv = get_network_bytes()
+    now = time.time()
+
+    if _net_last["time"] is None:
+        _net_last = {"time": now, "sent": sent, "recv": recv}
+        return {"upload_kbps": 0.0, "download_kbps": 0.0}
+
+    dt = now - _net_last["time"]
+    if dt <= 0:
+        dt = 1
+
+    upload_kbps = max(0.0, (sent - _net_last["sent"]) / dt / 1024)
+    download_kbps = max(0.0, (recv - _net_last["recv"]) / dt / 1024)
+
+    _net_last = {"time": now, "sent": sent, "recv": recv}
+
+    return {
+        "upload_kbps": round(upload_kbps, 2),
+        "download_kbps": round(download_kbps, 2)
+    }
 
 @app.route("/api/status")
 def status():
@@ -142,6 +184,21 @@ def api_cpu_percent():
     except Exception as e:
         print("CPU ERROR:", e)
         return jsonify({"cpu": None}), 500
+
+@app.route("/api/network")
+def api_network():
+    rates = get_network_rates()
+    up_stats = update_stats("net_up", rates["upload_kbps"])
+    down_stats = update_stats("net_down", rates["download_kbps"])
+
+    return jsonify({
+        "upload_kbps": rates["upload_kbps"],
+        "download_kbps": rates["download_kbps"],
+        "up_max": up_stats["max"],
+        "up_min": up_stats["min"],
+        "down_max": down_stats["max"],
+        "down_min": down_stats["min"]
+    })
 
 @app.route("/api/reset_stats/<metric>")
 def api_reset_stats(metric):

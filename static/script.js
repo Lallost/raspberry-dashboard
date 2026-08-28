@@ -161,7 +161,7 @@ function serviceAction(name, action) {
 }
 
 // === RESET MAX/MIN ===
-// metric: 'temperature' | 'cpu' | 'ram'
+// metric: 'temperature' | 'cpu' | 'ram' | 'net_up' | 'net_down'
 function resetStats(metric) {
     fetch(`/api/reset_stats/${metric}`)
         .then(r => r.json())
@@ -181,6 +181,16 @@ function resetStats(metric) {
                 ramChart.options.maxValue = undefined;
                 document.getElementById("ramMax").textContent = '--';
                 document.getElementById("ramMin").textContent = '--';
+            } else if (metric === 'net_up') {
+                netUpChart.options.minValue = undefined;
+                netUpChart.options.maxValue = undefined;
+                document.getElementById("netUpMax").textContent = '--';
+                document.getElementById("netUpMin").textContent = '--';
+            } else if (metric === 'net_down') {
+                netDownChart.options.minValue = undefined;
+                netDownChart.options.maxValue = undefined;
+                document.getElementById("netDownMax").textContent = '--';
+                document.getElementById("netDownMin").textContent = '--';
             }
         })
         .catch(err => alert("Errore reset: " + err));
@@ -346,6 +356,90 @@ setInterval(() => {
             document.getElementById("ramNow").textContent = ram.toFixed(1);
             document.getElementById("ramMin").textContent = (data.ram_min ?? ram).toFixed(1);
             document.getElementById("ramMax").textContent = (data.ram_max ?? ram).toFixed(1);
+        });
+}, 1000);
+
+
+// === NETWORK LIVE CHARTS (Upload/Download) ===
+
+// Serie dati Upload
+const netUpSeries = new TimeSeries();
+
+const netUpChart = new SmoothieChart({
+    millisPerPixel: 100,
+    grid: {
+        strokeStyle: 'rgba(255,255,255,0.1)',
+        lineWidth: 1,
+        millisPerLine: 5000,
+        verticalSections: 4
+    },
+    labels: { fillStyle: '#ffffff' }
+});
+
+netUpChart.addTimeSeries(netUpSeries, {
+    strokeStyle: 'rgba(255, 180, 0, 1)',
+    lineWidth: 2
+});
+
+netUpChart.streamTo(document.getElementById("netUpChart"), 1000);
+
+// Serie dati Download
+const netDownSeries = new TimeSeries();
+
+const netDownChart = new SmoothieChart({
+    millisPerPixel: 100,
+    grid: {
+        strokeStyle: 'rgba(255,255,255,0.1)',
+        lineWidth: 1,
+        millisPerLine: 5000,
+        verticalSections: 4
+    },
+    labels: { fillStyle: '#ffffff' }
+});
+
+netDownChart.addTimeSeries(netDownSeries, {
+    strokeStyle: 'rgba(120, 170, 255, 1)',
+    lineWidth: 2
+});
+
+netDownChart.streamTo(document.getElementById("netDownChart"), 1000);
+
+// Aggiorna ogni secondo
+setInterval(() => {
+    fetch("/api/network")
+        .then(r => r.json())
+        .then(data => {
+            const up = data.upload_kbps;
+            const down = data.download_kbps;
+
+            netUpSeries.append(Date.now(), up);
+            netDownSeries.append(Date.now(), down);
+
+            // Max/min registrati (persistiti lato server) - bloccano la scala del grafico
+            if (data.up_max !== null && data.up_max !== undefined) {
+                netUpChart.options.maxValue = data.up_max;
+            }
+            if (data.up_min !== null && data.up_min !== undefined) {
+                netUpChart.options.minValue = data.up_min;
+            }
+            if (data.down_max !== null && data.down_max !== undefined) {
+                netDownChart.options.maxValue = data.down_max;
+            }
+            if (data.down_min !== null && data.down_min !== undefined) {
+                netDownChart.options.minValue = data.down_min;
+            }
+
+            document.getElementById("netUpNow").textContent = up.toFixed(1);
+            document.getElementById("netUpMax").textContent = (data.up_max ?? up).toFixed(1);
+            document.getElementById("netUpMin").textContent = (data.up_min ?? up).toFixed(1);
+
+            document.getElementById("netDownNow").textContent = down.toFixed(1);
+            document.getElementById("netDownMax").textContent = (data.down_max ?? down).toFixed(1);
+            document.getElementById("netDownMin").textContent = (data.down_min ?? down).toFixed(1);
+        })
+        .catch(() => {
+            netUpSeries.append(Date.now(), null);
+            netDownSeries.append(Date.now(), null);
         });
 }, 1000);
 
